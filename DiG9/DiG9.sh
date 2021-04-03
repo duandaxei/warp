@@ -2,7 +2,7 @@
 
 # 还原 EUserv 初始的 resolv.conf
 echo -e "search blue.kundencontroller.de\noptions rotate\nnameserver 2a02:180:6:5::1c\nnameserver 2a02:180:6:5::4\nnameserver 2a02:180:6:5::1e\nnameserver 2a02:180:6:5::1d" > /etc/resolv.conf
- 
+
 # 判断系统
 
 # Debian 运行以下脚本
@@ -34,11 +34,11 @@ if grep -q -E -i "debian" /etc/issue; then
   elif grep -q -E -i "kernel" /etc/issue; then
 
  	# 替换为中国科技大学的elrepo源
-	wget -6 -p /etc/yum.repos.d https://cdn.jsdelivr.net/gh/fscarmen/warp/DiG9/elrepo.repo
+	wget -6 -N -P /etc/yum.repos.d/ https://cdn.jsdelivr.net/gh/fscarmen/warp/DiG9/elrepo.repo
 	
 
 	# 安装一些必要的网络工具包和wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
-	yum -y install net-tools wireguard-tools
+	yum -6 -y install net-tools wireguard-tools
 
 
 # 如都不符合，提示,删除临时文件并中止脚本
@@ -89,5 +89,5 @@ grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'preced
 rm -f DiG9* wgcf*
 
 # 结果提示
-ip a
+ip a | grep wgcf
 echo -e "\033[32m 结果：上面有 wgcf 的网络接口即为成功。如报错 429 Too Many Requests ，可再次运行脚本直至成功。 \033[0m"
