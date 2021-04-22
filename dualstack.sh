@@ -49,10 +49,10 @@ fi
 # 以下为3类系统公共部分
 
 # 安装 wireguard-go
-wget -N -P /usr/bin https://github.com/fscarmen/warp/raw/main/wireguard-go
+wget -N -6 -P /usr/bin https://github.com/fscarmen/warp/raw/main/wireguard-go
 
 # 安装 wgcf
-wget -N -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_amd64
+wget -N -6 -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_amd64
 
 # 添加执行权限
 chmod +x /usr/bin/wireguard-go /usr/local/bin/wgcf
@@ -64,7 +64,8 @@ echo | wgcf register
 wgcf generate
   
 # 修改配置文件 wgcf-profile.conf 的内容,使得 IPv4 的流量均被 WireGuard 接管，让 IPv4 的流量通过 WARP IPv6 节点以 NAT 的方式访问外部 IPv4 网络
-sed -i "7 s/^/PostUp = ip -6 rule add from $(ifconfig eth0 | grep "2a02" | awk '{ print $2}') lookup main\n/" wgcf-profile.conf | sed -i "8 s/^/PostDown = ip -6 rule delete from $(ifconfig eth0 | grep "2a02" | awk '{ print $2}') lookup main\n/" wgcf-profile.conf
+sed -i "7 s/^/PostUp = ip -6 rule add from $(ifconfig eth0 | grep "2a02" | awk '{ print $2}') lookup main\n/" wgcf-profile.conf
+sed -i "8 s/^/PostDown = ip -6 rule delete from $(ifconfig eth0 | grep "2a02" | awk '{ print $2}') lookup main\n/" wgcf-profile.conf
 
 # 把 wgcf-profile.conf 复制到/etc/wireguard/ 并命名为 wgcf.conf
 cp wgcf-profile.conf /etc/wireguard/wgcf.conf
@@ -79,7 +80,7 @@ systemctl enable wg-quick@wgcf
 grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | tee -a /etc/gai.conf
 
 # 删除临时文件
-rm -f warp* wgcf*
+rm -f dualstack* wgcf*
 
 # 结果提示
 ip a | grep '.*wgcf:.*' "--color=auto"

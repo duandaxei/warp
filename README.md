@@ -5,9 +5,9 @@
 # 目录
 
 - [好处](README.md#好处)
-- [为EUserv服务器添加IPv4网络接口方法](README.md#为EUserv服务器添加IPv4网络接口方法)
-- [为EUserv服务器添加双栈网络接口方法](README.md#为EUserv服务器添加双栈网络接口方法)
-- [为IPv4服务器添加IPv6网络接口方法](README.md#为IPv4服务器添加IPv6网络接口方法)
+- [为EUserv添加IPv4网络接口方法](README.md#为EUserv添加IPv4网络接口方法)
+- [为EUserv添加双栈网络接口方法](README.md#为EUserv添加双栈网络接口方法)
+- [为甲骨文添加IPv6网络接口方法](README.md#为甲骨文添加IPv6网络接口方法)
 - [临时、永久关闭和开启WGCF网络接口](README.md#临时永久关闭和开启WGCF网络接口)
 - [EUserv 主机名变为 DiG9 不能正常使用 NAT64 解决办法](https://github.com/fscarmen/warp/tree/main/DiG9#euserv-%E4%B8%BB%E6%9C%BA%E5%90%8D%E5%8F%98%E4%B8%BA-dig9-%E4%B8%8D%E8%83%BD%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8-nat64-%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95)
 - [WARP原理](README.md#WARP原理)
@@ -24,26 +24,31 @@
 * 由于可以双向转输数据，能做对方VPS的跳板和探针，替代 HE tunnelbroker
 
 
-## 为EUserv服务器添加IPv4网络接口方法
+## 为EUserv添加IPv4网络接口方法
 
 * 脚本会先行判断 EUserv 3种系统：Ubuntu 20.04、Debian 10、CentOS 8，再自动选相应的程序来完成，不需要人工选择。 
 
-* 完成后看到有 wgcf 的网络接口即为成功，并自动清理安装时的临时文件。
+* 脚本结束后会有结果提示，并自动清理安装时的临时文件。
 
 ```bash
-echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/warp.sh" && chmod +x warp.sh && ./warp.sh
+echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N -6 --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/warp.sh" && chmod +x warp.sh && ./warp.sh
 ```
 
-## 为EUserv服务器添加双栈网络接口方法
+## 为EUserv添加双栈网络接口方法
+
+* 脚本会先行判断 EUserv 3种系统：Ubuntu 20.04、Debian 10、CentOS 8，再自动选相应的程序来完成，不需要人工选择。 
+
+* 脚本结束后会有结果提示，并自动清理安装时的临时文件。
+
 ```bash
-echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/dualstack.sh" && chmod +x dualstack.sh && ./dualstack.sh
+echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N -6 --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/dualstack.sh" && chmod +x dualstack.sh && ./dualstack.sh
 ```
 
-## 为IPv4服务器添加IPv6网络接口方法
+## 为甲骨文添加IPv6网络接口方法
 
 * 脚本会先行判断 Oracle 3个系统：Ubuntu 20.04、Ubuntu 20.04 Minimal、CentOS 8，再自动选相应的程序来完成，不需要人工选择。 
 
-* 完成后看到有 wgcf 的网络接口即为成功，并自动清理安装时的临时文件。
+* 脚本结束后会有结果提示，并自动清理安装时的临时文件。
 
 * 甲骨文 CentOS 8 由于更新内核需要时间约15分钟，停留在 Running scriptlet: kernel-core-4.18.0-240.15.1.el8_3.x86_64 的时候耐心等待即可。 
 
