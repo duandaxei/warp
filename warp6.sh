@@ -3,14 +3,33 @@
 
 # 判断系统，安装差异部分
 
+# Debian 运行以下脚本
+if grep -q -E -i "debian" /etc/issue; then
+	
+	# 更新源
+	apt update
+
+	# 添加 backports 源,之后才能安装 wireguard-tools 
+	apt -y install lsb-release
+	echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" | tee /etc/apt/sources.list.d/backports.list
+
+	# 再次更新源
+	apt update
+
+	# 安装一些必要的网络工具包和wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
+	sudo apt -y --no-install-recommends install net-tools iproute2 openresolv dnsutils wireguard-tools
+	
+	# 安装 wireguard 内核模块
+	sudo apt -y --no-install-recommends install wireguard-dkms
+	
 # Ubuntu 运行以下脚本
-if grep -q -E -i "ubuntu" /etc/issue; then
+     elif grep -q -E -i "ubuntu" /etc/issue; then
 
 	# 更新源
 	sudo apt update
 
 	# 安装一些必要的网络工具包和 wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
-	sudo apt -y --no-install-recommends install openresolv dnsutils wireguard-tools
+	sudo apt -y --no-install-recommends install net-tools iproute2 openresolv dnsutils wireguard-tools
 	
 	# 安装 wireguard 内核模块
 	sudo apt -y --no-install-recommends install wireguard-dkms
@@ -47,6 +66,9 @@ sudo wget -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download
 
 # 添加执行权限
 sudo chmod +x /usr/local/bin/wgcf
+
+# 添加执行文件环境变量
+export PATH=$PATH:/usr/local/bin
 
 # 注册 WARP 账户 (将生成 wgcf-account.toml 文件保存账户信息)
 echo | wgcf register
