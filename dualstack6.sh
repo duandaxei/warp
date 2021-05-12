@@ -29,7 +29,7 @@ if grep -q -E -i "debian" /etc/issue; then
 	sudo apt update
 
 	# 安装一些必要的网络工具包和 wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
-	sudo apt -y --no-install-recommends install net-tools iproute2 openresolv dnsutils wireguard-tools
+	sudo apt -y --no-install-recommends install net-tools iproute2 openresolv dnsutils wireguard-tools linux-headers-$(uname -r)
 	
 	# 安装 wireguard 内核模块
 	sudo apt -y --no-install-recommends install wireguard-dkms
@@ -38,7 +38,7 @@ if grep -q -E -i "debian" /etc/issue; then
      elif grep -q -E -i "kernel" /etc/issue; then
 
 	# 安装一些必要的网络工具包和wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
-	sudo yum -y install net-tools wireguard-tools linux-headers-$(uname -r)
+	sudo yum -y install net-tools wireguard-tools
 
 	# 安装 wireguard 内核模块
 	sudo curl -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo
@@ -56,7 +56,7 @@ if grep -q -E -i "debian" /etc/issue; then
 	echo -e "\033[32m 抱歉，我不认识此系统！\033[0m"
 	
 	# 删除临时目录和文件，退出脚本
-	rm -f warp*
+	rm -f dualstack*
 	exit 0
 
 fi
@@ -92,7 +92,7 @@ sudo systemctl enable wg-quick@wgcf
 grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | sudo tee -a /etc/gai.conf
 
 # 删除临时文件
-rm -f warp* wgcf*
+rm -f dualstack* wgcf*
 
 # 结果提示
 ip a | grep '.*wgcf:.*' "--color=auto"
