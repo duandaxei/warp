@@ -29,15 +29,16 @@ if grep -q -E -i "debian" /etc/issue; then
 	sudo apt update
 
 	# 安装一些必要的网络工具包和 wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
-	sudo apt -y --no-install-recommends install net-tools iproute2 openresolv dnsutils wireguard-tools linux-headers-$(uname -r)
+	sudo apt -y --no-install-recommends install net-tools iproute2 openresolv dnsutils wireguard-tools
 	
 	# 安装 wireguard 内核模块
-	sudo apt -y --no-install-recommends install wireguard-dkms
+	# sudo apt -y --no-install-recommends install wireguard-dkms
 
 # CentOS 运行以下脚本
      elif grep -q -E -i "kernel" /etc/issue; then
 
 	# 安装一些必要的网络工具包和wireguard-tools (Wire-Guard 配置工具：wg、wg-quick)
+	sudo yum -y install epel-release
 	sudo yum -y install net-tools wireguard-tools
 
 	# 安装 wireguard 内核模块
@@ -83,10 +84,10 @@ sudo sed -i "7 s/^/PostUp = ip -4 rule add from $(ip a | grep ens | awk -F '/' '
 sudo cp wgcf-profile.conf /etc/wireguard/wgcf.conf
 
 # 启用 Wire-Guard 网络接口守护进程
-sudo systemctl start wg-quick@wgcf
+systemctl start wg-quick@wgcf
 
 # 设置开机启动
-sudo systemctl enable wg-quick@wgcf
+systemctl enable wg-quick@wgcf
 
 # 优先使用 IPv4 网络
 grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | sudo tee -a /etc/gai.conf
