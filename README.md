@@ -19,8 +19,9 @@
 ## 好处
 
 * 能让像EUserv这样的IPv6 only VPS上做的节点支持Telegram
-* IPv6 建的节点能在 PassWall、ShadowSocksR Plus+ 上应用
+* IPv6 建的节点能在 PassWall、ShadowSocksR Plus+ 上使用
 * 解锁奈飞流媒体
+* 避免 Google 验证码或是使用 Google 学术搜索
 * 可调用IPv4接口使京* docker 和 V2P 等正常运行
 * 由于可以双向转输数据，能做对方VPS的跳板和探针，替代 HE tunnelbroker
 
@@ -57,7 +58,7 @@ echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N -6 --no-check-c
 wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/warp6.sh" && chmod +x warp6.sh && ./warp6.sh
 ```
 
-## 为甲骨文、谷歌云添加双栈网络接口方法(测试中，暂时谷歌云Debian 10和ubuntu 20.04通过）
+## 为甲骨文、谷歌云添加双栈网络接口方法
 
 * 脚本会先行判断 Oracle、GCP 3种系统：Ubuntu 20.04、Debian 10、CentOS 8，再自动选相应的程序来完成，不需要人工选择。 
 
