@@ -9,6 +9,7 @@
 - [为EUserv添加双栈网络接口方法](README.md#为EUserv添加双栈网络接口方法)
 - [为甲骨文、谷歌云添加IPv6网络接口方法](README.md#为甲骨文谷歌云添加IPv6网络接口方法)
 - [为甲骨文、谷歌云添加双栈网络接口方法](README.md#为甲骨文谷歌云添加双栈网络接口方法)
+- [为甲骨文添加IPv4网络接口方法(ARM架构专用）](README.md#为甲骨文添加IPv4网络接口方法ARM架构专用)
 - [临时、永久关闭和开启WGCF网络接口](README.md#临时永久关闭和开启WGCF网络接口)
 - [EUserv 主机名变为 DiG9 不能正常使用 NAT64 解决办法](https://github.com/fscarmen/warp/tree/main/DiG9#euserv-%E4%B8%BB%E6%9C%BA%E5%90%8D%E5%8F%98%E4%B8%BA-dig9-%E4%B8%8D%E8%83%BD%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8-nat64-%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95)
 - [WARP原理](README.md#WARP原理)
@@ -52,8 +53,6 @@ echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N -6 --no-check-c
 
 * 脚本结束后会有结果提示，并自动清理安装时的临时文件。
 
-* 甲骨文 CentOS 8 由于更新内核需要时间约15分钟，停留在 Running scriptlet: kernel-core-4.18.0-240.15.1.el8_3.x86_64 的时候耐心等待即可。 
-
 ```bash
 wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/warp6.sh" && chmod +x warp6.sh && ./warp6.sh
 ```
@@ -64,10 +63,18 @@ wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/
 
 * 脚本结束后会有结果提示，并自动清理安装时的临时文件。
 
-* 甲骨文 CentOS 8 由于更新内核需要时间约15分钟，停留在 Running scriptlet: kernel-core-4.18.0-240.15.1.el8_3.x86_64 的时候耐心等待即可。 
-
 ```bash
 wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/dualstack6.sh" && chmod +x dualstack6.sh && ./dualstack6.sh
+```
+
+## 为甲骨文添加IPv4网络接口方法(ARM架构专用）
+
+* 专为甲骨文 ARM 架构的 IPv6 only 的实例添加 IPv4。新建ARM实例如果因为 Limit for ephemeral public IP per tenant of 2 has been already reached 失败的话，可以在”网络“->“不分配公共 IPv4 地址”,接着在实例开出后添加 IPv6 地址，最后登陆实例使用此脚本以添加 IPv4 网络。
+
+* 脚本结束后会有结果提示，并自动清理安装时的临时文件。
+
+```bash
+echo -e nameserver 2a00:1098:2b::1 > /etc/resolv.conf && wget -N --no-check-certificate "https://raw.githubusercontent.com/fscarmen/warp/main/warparm.sh" && chmod +x warparm.sh && ./warparm.sh
 ```
 
 ## 临时、永久关闭和开启WGCF网络接口
@@ -93,7 +100,7 @@ WARP是CloudFlare提供的一项基于WireGuard的网络流量安全及加速服
 
 原理如图，IPv6的流量均被WARP网卡接管，实现了让IPv6的流量通过WARP访问外部网络。
 
-![2021-02-04_21-45-44.png](https://i.loli.net/2021/03/20/6Tmc7WQOGa8dDoM.png)
+![2021-02-04_21-45-44.png](https://cdn.luotianyi.vc/wp-content/uploads/2021-02-04_21-45-44.png)
 
 * 双栈服务器置换网络
 
