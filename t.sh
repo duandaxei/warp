@@ -1,10 +1,14 @@
 ##### 为 IPv4 only VPS 添加 WGCF，双栈走 warp #####
 ##### KVM 属于完整虚拟化的 VPS 主机，网络性能方面：内核模块＞wireguard-go。#####
 
-# 判断系统架构是 AMD 还是 ARM
+# 判断系统架构是 AMD 还是 ARM，虚拟化是 LXC 还是 KVM,设置应用的依赖与环境
 if [[ $(hostnamectl) =~ .*arm.* ]]
-  then sys=arm64
-  else sys=amd64
+    then wgcfpath=https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_arm64
+  elif [[ $(hostnamectl) =~ .*lxc.* ]]
+    then wgcfpath=https://github.com/fscarmen/warp/raw/main/wireguard-go
+         wget -nc -P -6 /usr/bin https://github.com/fscarmen/warp/raw/main/wireguard-go
+	 chmod +x /usr/bin/wireguard-go
+  else wgcfpath=https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_amd64
 fi
 
 # 判断系统，安装差异部分
@@ -68,7 +72,7 @@ fi
 # 以下为3类系统公共部分
 
 # 安装 wgcf
-sudo wget -nc -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$sys
+sudo wget -nc -6 -O /usr/local/bin/wgcf $wgcfpath 
 
 # 添加执行权限
 sudo chmod +x /usr/local/bin/wgcf
@@ -80,7 +84,7 @@ echo | wgcf register
 wgcf generate
 
 # 修改配置文件 wgcf-profile.conf 的内容,使得 IPv6 的流量均被 WireGuard 接管，让 IPv6 的流量通过 WARP IPv4 节点以 NAT 的方式访问外部 IPv6 网络，为了防止当节点发生故障时 DNS 请求无法发出，修改为 IPv4 地址的 DNS
-sudo sed -i "7 s/^/PostUp = ip -4 rule add from $(ip a | grep -E 'ens|eth0|enp' | awk -F '/' '{print $1}' | awk 'NR==2 {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i "8 s/^/PostDown = ip -4 rule delete from $(ip a | grep -E 'ens|eth0|enp' | awk -F '/' '{print $1}' | awk 'NR==2 {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i 's/engage.cloudflareclient.com/162.159.192.1/g' wgcf-profile.conf && sudo sed -i 's/1.1.1.1/9.9.9.10,8.8.8.8,1.1.1.1/g' wgcf-profile.conf
+sudo sed -i "7 s/^/PostUp = ip -6 rule add from $(ip a | egrep 'inet6' | awk -F '/' '{print $1}' | awk 'NR==2 {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip a | egrep 'inet6' | awk -F '/' '{print $1}' | awk 'NR==2 {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf && sudo sed -i 's/1.1.1.1/1.1.1.1,9.9.9.10,8.8.8.8/g' wgcf-profile.conf
 
 # 把 wgcf-profile.conf 复制到/etc/wireguard/ 并命名为 wgcf.conf
 sudo cp wgcf-profile.conf /etc/wireguard/wgcf.conf
