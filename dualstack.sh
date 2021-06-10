@@ -45,14 +45,19 @@ if grep -q -E -i "debian" /etc/issue; then
 
 fi
 
+# 判断系统架构是 AMD 还是 ARM，虚拟化是 LXC 还是 KVM,设置应用的依赖与环境
+if [[ $(hostnamectl) =~ .*arm.* ]]
+  then architecture=arm64
+  else architecture=amd64
+fi
 
 # 以下为3类系统公共部分
 
-# 安装 wireguard-go
-wget -nc -6 -P /usr/bin https://github.com/fscarmen/warp/raw/main/wireguard-go
-
 # 安装 wgcf
-wget -nc -6 -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_amd64
+wget -nc -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$architecture
+
+# 安装 wireguard-go
+wget -nc -P /usr/bin https://github.com/fscarmen/warp/raw/main/wireguard-go
 
 # 添加执行权限
 chmod +x /usr/bin/wireguard-go /usr/local/bin/wgcf
@@ -61,15 +66,13 @@ chmod +x /usr/bin/wireguard-go /usr/local/bin/wgcf
 echo | wgcf register
 until [ $? -eq 0 ]  
   do
+   echo -e "\033[32m warp 注册接口繁忙，3秒后自动重试 \033[0m"
+   sleep 3
    echo | wgcf register
 done
 
 # 生成 Wire-Guard 配置文件 (wgcf-profile.conf)
 wgcf generate
-until [ $? -eq 0 ]  
-  do
-   wgcf generate
-done
   
 # 修改配置文件 wgcf-profile.conf 的内容,使得 IPv4 IPv6 的流量均被 WireGuard 接管
 sed -i "7 s/^/PostUp = ip -6 rule add from $(wget -qO- ipv6.ip.sb) lookup main\n/" wgcf-profile.conf && sed -i "8 s/^/PostDown = ip -6 rule delete from $(wget -qO- ipv6.ip.sb) lookup main\n/" wgcf-profile.conf && sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
@@ -90,9 +93,6 @@ until [ $? -eq 0 ]
    wget -qO- ipv4.ip.sb
 done
 
-# 启用 Wire-Guard 网络接口守护进程
-# systemctl start wg-quick@wgcf
-
 # 设置开机启动
 systemctl enable wg-quick@wgcf
 
@@ -100,4 +100,4 @@ systemctl enable wg-quick@wgcf
 grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | tee -a /etc/gai.conf
 
 # 结果提示
-echo -e "\033[32m 恭喜！warp 双栈已成功，IPv4地址为:$(wget -qO- ipv4.ip.sb)，IPv6地址为:$(wget -qO- ipv6.ip.sb)。 \033[0m"
+echo -e "\033[32m 恭喜！warp 双栈已成功，IPv4地址为:$(wget -qO- ipv4.ip.sb)，IPv6地址为:$(wget -qO- ipv6.ip.sb) \033[0m"

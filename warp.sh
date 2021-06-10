@@ -45,14 +45,19 @@ if grep -q -E -i "debian" /etc/issue; then
 
 fi
 
+# 判断系统架构是 AMD 还是 ARM，虚拟化是 LXC 还是 KVM,设置应用的依赖与环境
+if [[ $(hostnamectl) =~ .*arm.* ]]
+  then architecture=arm64
+  else architecture=amd64
+fi
 
 # 以下为3类系统公共部分
 
+# 安装 wgcf
+wget -nc -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$architecture
+
 # 安装 wireguard-go
 wget -nc -P /usr/bin https://github.com/fscarmen/warp/raw/main/wireguard-go
-
-# 安装 wgcf
-wget -nc -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_amd64
 
 # 添加执行权限
 chmod +x /usr/bin/wireguard-go /usr/local/bin/wgcf
@@ -61,15 +66,13 @@ chmod +x /usr/bin/wireguard-go /usr/local/bin/wgcf
 echo | wgcf register
 until [ $? -eq 0 ]  
   do
+   echo -e "\033[32m warp 注册接口繁忙，3秒后自动重试 \033[0m"
+   sleep 3
    echo | wgcf register
 done
 
 # 生成 Wire-Guard 配置文件 (wgcf-profile.conf)
 wgcf generate
-until [ $? -eq 0 ]  
-  do
-   wgcf generate
-done
   
 # 修改配置文件 wgcf-profile.conf 的内容,使得 IPv4 的流量均被 WireGuard 接管，让 IPv4 的流量通过 WARP IPv6 节点以 NAT 的方式访问外部 IPv4 网络
 sed -i '/\:\:\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
@@ -89,9 +92,6 @@ until [ $? -eq 0 ]
    wg-quick up wgcf
    wget -qO- ipv4.ip.sb
 done
-
-# 启用 Wire-Guard 网络接口守护进程
-# systemctl start wg-quick@wgcf
 
 # 设置开机启动
 systemctl enable wg-quick@wgcf
