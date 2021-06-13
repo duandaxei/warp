@@ -68,7 +68,7 @@ fi
 # 以下为3类系统公共部分
 
 # 安装 wgcf
-sudo wget -nc -6 -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$architecture
+sudo wget -N -6 -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$architecture
 
 # 添加执行权限
 sudo chmod +x /usr/local/bin/wgcf
@@ -86,7 +86,7 @@ done
 wgcf generate
 
 # 修改配置文件 wgcf-profile.conf 的内容,使得 IPv6 的流量均被 WireGuard 接管，让 IPv6 的流量通过 WARP IPv4 节点以 NAT 的方式访问外部 IPv6 网络，为了防止当节点发生故障时 DNS 请求无法发出，修改为 IPv4 地址的 DNS
-sudo sed -i "7 s/^/PostUp = ip -6 rule add from $(ip a | egrep 'inet6' | awk -F '/' '{print $1}' | awk 'NR==2 {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip a | egrep 'inet6' | awk -F '/' '{print $1}' | awk 'NR==2 {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf && sudo sed -i 's/1.1.1.1/1.1.1.1,9.9.9.10,8.8.8.8/g' wgcf-profile.conf
+sudo sed -i "7 s/^/PostUp = ip -6 rule add from $(ip a | egrep 'inet6' | awk -F '/' '{print $1}' | awk 'END {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip a | egrep 'inet6' | awk -F '/' '{print $1}' | awk 'END {print $2}') lookup main\n/" wgcf-profile.conf && sudo sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf && sudo sed -i 's/1.1.1.1/1.1.1.1,9.9.9.10,8.8.8.8/g' wgcf-profile.conf
 
 # 把 wgcf-profile.conf 复制到/etc/wireguard/ 并命名为 wgcf.conf
 sudo cp wgcf-profile.conf /etc/wireguard/wgcf.conf
@@ -96,12 +96,13 @@ rm -f dualstack* wgcf*
 
 # 自动刷直至成功（ warp bug，有时候获取不了ip地址）
 wg-quick up wgcf
+echo -e "\033[32m warp 获取 IP 中，如失败将自动重试直到成功。 \033[0m"
 wget -qO- ipv4.ip.sb
 until [ $? -eq 0 ]  
   do
-   echo -e "\033[32m warp 获取 IP 失败，自动重试直到成功。 \033[0m"
    wg-quick down wgcf
    wg-quick up wgcf
+   echo -e "\033[32m warp 获取 IP 失败，自动重试直到成功。 \033[0m"
    wget -qO- ipv4.ip.sb
 done
 
@@ -109,7 +110,7 @@ done
 systemctl enable wg-quick@wgcf
 
 # 优先使用 IPv4 网络
-grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | sudo tee -a /etc/gai.conf
+grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | tee -a /etc/gai.conf
 
 # 结果提示
 echo -e "\033[32m 恭喜！warp 双栈已成功，IPv4地址为:$(wget -qO- ipv4.ip.sb)，IPv6地址为:$(wget -qO- ipv6.ip.sb) \033[0m"

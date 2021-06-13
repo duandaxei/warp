@@ -69,7 +69,7 @@ fi
 # 以下为3类系统公共部分
 
 # 安装 wgcf
-sudo wget -nc -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$architecture
+sudo wget -N -O /usr/local/bin/wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.3/wgcf_2.2.3_linux_$architecture
 
 # 添加执行权限
 sudo chmod +x /usr/local/bin/wgcf
@@ -107,10 +107,10 @@ until [ $? -eq 0 ]
 done
 
 # 设置开机启动
-sudo systemctl enable wg-quick@wgcf
+systemctl enable wg-quick@wgcf
 
 # 优先使用 IPv4 网络
-grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | sudo tee -a /etc/gai.conf
+grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | tee -a /etc/gai.conf
 
 # 结果提示
 echo -e "\033[32m 恭喜！为 IPv4 only VPS 添加 warp 已成功，IPv6地址为:$(wget -qO- ipv6.ip.sb) \033[0m"
