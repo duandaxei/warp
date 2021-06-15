@@ -41,7 +41,7 @@
 ![menu.jpg](https://i.loli.net/2021/06/13/DGyVL9TFo8YmMeb.jpg)
 
 ```bash
-wget -N https://raw.githubusercontent.com/fscarmen/warp/main/menu.sh && chmod +x menu.sh && ./menu.sh
+wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && chmod +x menu.sh && ./menu.sh
 ```
 
 ## 为EUserv添加 IPv4 网络接口方法
@@ -103,7 +103,7 @@ WARP是CloudFlare提供的一项基于WireGuard的网络流量安全及加速服
 
 原理如图，IPv6的流量均被WARP网卡接管，实现了让IPv6的流量通过WARP访问外部网络。
 
-![2021-02-04_21-45-44.png](https://cdn.luotianyi.vc/wp-content/uploads/2021-02-04_21-45-44.png)
+![2021-02-04_21-45-44.png](https://i.loli.net/2021/06/15/ARfOasgp286xjym.png)
 
 * 双栈服务器置换网络
 
