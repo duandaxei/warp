@@ -60,8 +60,8 @@ chmod +x /usr/bin/wireguard-go /usr/local/bin/wgcf
 echo | wgcf register
 until [ $? -eq 0 ]  
   do
-   echo -e "\033[32m warp 注册接口繁忙，3秒后自动重试直到成功。 \033[0m"
-   sleep 3
+   echo -e "\033[32m warp 注册接口繁忙，5秒后自动重试直到成功。 \033[0m"
+   sleep 5
    echo | wgcf register
 done
 
@@ -69,7 +69,7 @@ done
 wgcf generate
   
 # 修改配置文件 wgcf-profile.conf 的内容,使得 IPv4 IPv6 的流量均被 WireGuard 接管
-sed -i "7 s/^/PostUp = ip -6 rule add from $(wget -qO- ipv6.ip.sb) lookup main\n/" wgcf-profile.conf && sed -i "8 s/^/PostDown = ip -6 rule delete from $(wget -qO- ipv6.ip.sb) lookup main\n/" wgcf-profile.conf && sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
+sed -i "7 s/^/PostUp = ip -6 rule add from $(wget -qO- -6 ip.gs) lookup main\n/" wgcf-profile.conf && sed -i "8 s/^/PostDown = ip -6 rule delete from $(wget -qO- -6 ip.gs) lookup main\n/" wgcf-profile.conf && sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
 
 # 把 wgcf-profile.conf 复制到/etc/wireguard/ 并命名为 wgcf.conf
 cp wgcf-profile.conf /etc/wireguard/wgcf.conf
@@ -80,13 +80,13 @@ rm -f dualstack* wgcf*
 # 自动刷直至成功（ warp bug，有时候获取不了ip地址）
 wg-quick up wgcf
 echo -e "\033[32m warp 获取 IP 中，如失败将自动重试直到成功。 \033[0m"
-wget -qO- ipv4.ip.sb
+wget -qO- -4 ip.gs
 until [ $? -eq 0 ]  
   do
    wg-quick down wgcf
    wg-quick up wgcf
    echo -e "\033[32m warp 获取 IP 失败，自动重试直到成功。 \033[0m"
-   wget -qO- ipv4.ip.sb
+   wget -qO- -4 ip.gs
 done
 
 # 设置开机启动
@@ -96,4 +96,4 @@ systemctl enable wg-quick@wgcf
 grep -qE '^[ ]*precedence[ ]*::ffff:0:0/96[ ]*100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | tee -a /etc/gai.conf
 
 # 结果提示
-echo -e "\033[32m 恭喜！warp 双栈已成功，IPv4地址为:$(wget -qO- ipv4.ip.sb)，IPv6地址为:$(wget -qO- ipv6.ip.sb) \033[0m"
+echo -e "\033[32m 恭喜！warp 双栈已成功，IPv4地址为:$(wget -qO- -4 ip.gs)，IPv6地址为:$(wget -qO- -6 ip.gs) \033[0m"
